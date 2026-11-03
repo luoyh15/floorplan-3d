@@ -1,0 +1,436 @@
+{
+  "format": "floorplan-3d",
+  "version": 2,
+  "plan": {
+    "id": "bathroom-1800-1700",
+    "revision": 11,
+    "name": "卫生间 · 1.8 × 1.7 m",
+    "nameEn": "Bathroom · 1.8 × 1.7 m",
+    "summary": "卫生间 1.8 × 1.7 m",
+    "summaryEn": "Bathroom 1.8 × 1.7 m",
+    "ceilingHeight": 3.3,
+    "center": [
+      850,
+      900
+    ],
+    "bounds": {
+      "x": -550,
+      "y": -500,
+      "w": 2850,
+      "h": 3400
+    },
+    "walls": [
+      [
+        -100,
+        -100,
+        1800,
+        0,
+        "e"
+      ],
+      [
+        -100,
+        0,
+        0,
+        1900,
+        "e"
+      ],
+      [
+        1700,
+        0,
+        1800,
+        1900,
+        "e"
+      ],
+      [
+        0,
+        1800,
+        900,
+        1900,
+        "e"
+      ],
+      [
+        0,
+        730,
+        1700,
+        800,
+        "low",
+        null,
+        0.05
+      ]
+    ],
+    "windows": [],
+    "doors": [
+      {
+        "name": "卫生间门",
+        "rect": [
+          900,
+          1800,
+          1700,
+          1900
+        ],
+        "h": [
+          1700,
+          1800
+        ],
+        "c": [
+          -1,
+          0
+        ],
+        "o": [
+          0,
+          -1
+        ],
+        "len": 800,
+        "entry": true
+      }
+    ],
+    "slides": [],
+    "rooms": [
+      {
+        "id": "bathroom",
+        "name": "卫生间",
+        "poly": [
+          [
+            0,
+            0
+          ],
+          [
+            1700,
+            0
+          ],
+          [
+            1700,
+            1800
+          ],
+          [
+            0,
+            1800
+          ]
+        ],
+        "mat": "tile800x400"
+      }
+    ],
+    "floorLayout": {
+      "room": "bathroom",
+      "material": "tile800x400",
+      "width": 1700,
+      "depth": 1800,
+      "tileWidth": 800,
+      "tileDepth": 400,
+      "grout": 2,
+      "columns": [
+        100,
+        800,
+        800
+      ],
+      "zones": [
+        {
+          "y": 0,
+          "rows": [
+            200,
+            400,
+            130
+          ]
+        },
+        {
+          "y": 800,
+          "rows": [
+            200,
+            400,
+            400
+          ]
+        }
+      ]
+    },
+    "wallTiles": {
+      "material": "tile800x400",
+      "xOffset": 100,
+      "sideOffset": 200
+    },
+    "furniture": [
+      {
+        "id": "fmw0vkkg036",
+        "type": "shower",
+        "name": "淋浴区",
+        "cx": 850,
+        "cy": 365,
+        "w": 1700,
+        "d": 730,
+        "rot": 0,
+        "color": "#e4edf2",
+        "hideLabel": true,
+        "tiledFloor": true
+      },
+      {
+        "id": "fmw0vkkg037",
+        "type": "toilet",
+        "name": "马桶",
+        "cx": 360,
+        "cy": 1180,
+        "w": 366,
+        "d": 700,
+        "rot": 270,
+        "color": "#ffffff",
+        "height": 698,
+        "hideLabel": true
+      },
+      {
+        "id": "fmw0vkkg038",
+        "type": "vanity",
+        "name": "洗手台",
+        "cx": 250,
+        "cy": 1650,
+        "w": 300,
+        "d": 500,
+        "rot": 270,
+        "color": "#eef1f3"
+      }
+    ],
+    "pipes": [
+      {
+        "id": "wc-drain",
+        "cx": 370,
+        "cy": 1180,
+        "outerDiameter": 130,
+        "wallThickness": 3,
+        "height": 0,
+        "color": "#c8cdd0"
+      }
+    ],
+    "unverified": true,
+    "roomLabelSize": 100,
+    "entryFontSize": 75,
+    "dimensionStyle": {
+      "fontSize": 80,
+      "tickSize": 55,
+      "slashSize": 22,
+      "textOffset": 28
+    },
+    "dimensions": [
+      {
+        "horizontal": true,
+        "at": -280,
+        "start": 0,
+        "segs": [
+          1700
+        ]
+      },
+      {
+        "horizontal": false,
+        "at": 2020,
+        "start": 0,
+        "segs": [
+          1800
+        ]
+      },
+      {
+        "horizontal": false,
+        "at": -290,
+        "start": 0,
+        "segs": [
+          730,
+          70,
+          1000
+        ]
+      }
+    ],
+    "annotations": [
+      {
+        "type": "text",
+        "at": [
+          850,
+          355
+        ],
+        "label": "淋浴区 730",
+        "labelEn": "Shower 730",
+        "fontSize": 100
+      },
+      {
+        "type": "text",
+        "at": [
+          850,
+          780
+        ],
+        "label": "挡水条 70",
+        "labelEn": "Curb 70",
+        "fontSize": 50
+      },
+      {
+        "type": "dimension",
+        "a": [
+          370,
+          800
+        ],
+        "b": [
+          370,
+          1180
+        ],
+        "label": "380",
+        "labelAt": [
+          480,
+          1000
+        ],
+        "fontSize": 75,
+        "color": "#b5653a"
+      },
+      {
+        "type": "dimension",
+        "a": [
+          0,
+          1180
+        ],
+        "b": [
+          305,
+          1180
+        ],
+        "label": "305",
+        "labelAt": [
+          152.5,
+          1130
+        ],
+        "fontSize": 70,
+        "color": "#b5653a"
+      },
+      {
+        "type": "text",
+        "at": [
+          850,
+          1170
+        ],
+        "leader": [
+          [
+            435,
+            1180
+          ],
+          [
+            530,
+            1140
+          ],
+          [
+            600,
+            1140
+          ]
+        ],
+        "label": "下水口 Φ130",
+        "labelEn": "Drain Ø130",
+        "fontSize": 75,
+        "color": "#b74339"
+      }
+    ],
+    "notes": [
+      {
+        "zh": "淋浴区深 730 mm、挡水条宽 70 mm、干区深 1000 mm。瓷砖 800 × 400 mm，浅灰米色横向对缝，墙砖高 400 mm。地砖从门口整砖起铺，向内依次 400 + 400 + 200 mm 到挡水条；在挡水条处切开，沿原砖缝继续向淋浴区铺 130 + 400 + 200 mm 到墙。横向暂排 100 + 800 + 800 mm，砖缝示意 2 mm。",
+        "en": "Shower depth 730 mm, curb width 70 mm, dry area depth 1000 mm. 800 × 400 mm warm gray tiles with stacked joints; wall rows 400 mm high. Start full floor tiles at the doorway: 400 + 400 + 200 mm to the curb. Cut around the curb and continue the same grid inward: 130 + 400 + 200 mm to the shower wall. Assumed columns 100 + 800 + 800 mm; 2 mm grout."
+      },
+      {
+        "zh": "下水口直径按用户指定为 130 mm；左缘距左墙 305 mm，中心坐标 (370,1180) mm，中心距 70 mm 宽挡水条的干区侧边 380 mm。",
+        "en": "User-specified drain diameter 130 mm; left edge 305 mm from left wall, center (370,1180) mm, 380 mm from the dry-side edge of the 70 mm curb."
+      },
+      {
+        "zh": "马桶采用 366 × 700 mm、总高 698 mm 的典型尺寸示意，可独立拖动、旋转、改尺寸；不绑定管道。门向内开，暂定宽 800 mm；左下角洗手台宽 300 × 深 500 mm，龙头靠左墙，选中查看尺寸，无常驻尺寸标注。挡水条高 50 mm。",
+        "en": "Representative toilet: 366 × 700 mm, height 698 mm, independently movable and resizable. Door opens inward, assumed 800 mm wide. Lower-left washbasin: width 300 mm, depth 500 mm, tap against the left wall; select to inspect dimensions, without persistent dimension labels. Curb height 50 mm."
+      }
+    ],
+    "sources": [
+      {
+        "label": "Kohler NEW PATIO 700 × 366 × 698 mm",
+        "url": "https://files.kohler.com.cn/book_files/contentPic/cid2/32.2024%E5%B9%B4%20%E5%BA%A7%E4%BE%BF%E5%99%A8%E5%8F%8A%E7%9B%96%E6%9D%BF.pdf"
+      }
+    ],
+    "bathroomSpec": {
+      "width": 1700,
+      "depth": 1800,
+      "showerDepth": 730,
+      "curbDepth": 70,
+      "dryDepth": 1000,
+      "drainFromCurb": 380,
+      "pipeLeftEdge": 305,
+      "pipeOuterDiameter": 130,
+      "drainCenterX": 370,
+      "drainCenterY": 1180,
+      "pipeDiameterReference": false,
+      "toiletDimensions": {
+        "w": 366,
+        "d": 700,
+        "height": 698
+      },
+      "toiletRotation": 270
+    },
+    "entry": {
+      "arrow": [],
+      "label": "门 800（暂定）",
+      "labelEn": "Door 800 (assumed)",
+      "labelAt": [
+        1300,
+        2180
+      ],
+      "walkStart": [
+        1300,
+        1580
+      ],
+      "walkLookAt": [
+        850,
+        350
+      ]
+    },
+    "lintels": [],
+    "iso": [
+      2.6,
+      6.2,
+      4.2
+    ],
+    "topDistance": 4.8,
+    "minimumOrbitDistance": 7.2
+  },
+  "state": {
+    "planId": "bathroom-1800-1700",
+    "planRevision": 11,
+    "furniture": [
+      {
+        "id": "fmw0vkkg174",
+        "type": "shower",
+        "name": "淋浴区",
+        "cx": 850,
+        "cy": 365,
+        "w": 1700,
+        "d": 730,
+        "rot": 0,
+        "color": "#e4edf2",
+        "hideLabel": true,
+        "tiledFloor": true
+      },
+      {
+        "id": "fmw0vkkg175",
+        "type": "toilet",
+        "name": "马桶",
+        "cx": 360,
+        "cy": 1180,
+        "w": 366,
+        "d": 700,
+        "rot": 270,
+        "color": "#ffffff",
+        "height": 698,
+        "hideLabel": true
+      },
+      {
+        "id": "fmw0vkkg176",
+        "type": "vanity",
+        "name": "洗手台",
+        "cx": 250,
+        "cy": 1650,
+        "w": 300,
+        "d": 500,
+        "rot": 270,
+        "color": "#eef1f3"
+      }
+    ],
+    "rooms": {
+      "bathroom": {
+        "name": "卫生间",
+        "mat": "tile800x400"
+      }
+    },
+    "demolished": [],
+    "measures": []
+  }
+}
