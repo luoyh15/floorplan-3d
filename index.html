@@ -3850,12 +3850,12 @@ function init(){
     const tap = downAt && Math.hypot(e.clientX-downAt[0], e.clientY-downAt[1]) <= TAP;
     if (look?.id === e.pointerId){
       look = null;
-      if (tap){ const h = pick(e); if (h?.door && h.dist < 3.5) h.door.open = !h.door.open; }   // 漫游时点门开关
+      if (tap){ const h = pick(e); if (h?.door && h.dist < 3.5) toggleDoor(h.door); }   // 漫游时点门开关
       return;
     }
     if (anim || opt.mode !== 'orbit' || !tap) return;
     const h = pick(e);
-    if (h?.door) h.door.open = !h.door.open;
+    if (h?.door) toggleDoor(h.door);
     else if (h?.fid) window.select({kind:'furn', id:h.fid});
     else if (h?.room) window.select({kind:'room', id:h.room});
     else window.select(null);
@@ -4810,6 +4810,15 @@ async function exit(){
 
 /* ======================= 选择 / 拾取 ======================= */
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+function toggleDoor(door){
+  door.open=!door.open;
+  toast(door.open ? tr('门已打开','Door opened') : tr('门已关闭','Door closed'));
+}
+function visibleMesh(o){
+  if(!o.isMesh) return false;
+  for(let p=o;p;p=p.parent) if(p.visible===false) return false;
+  return true;
+}
 function pick(e){
   if (!e) ptr.set(0, 0);
   else { const r = renderer.domElement.getBoundingClientRect(); ptr.set((e.clientX - r.left)/r.width*2 - 1, -(e.clientY - r.top)/r.height*2 + 1); }
@@ -4817,6 +4826,7 @@ function pick(e){
   const hits = ray.intersectObjects([...(opt.furn ? [furnG] : []), archUp, archFloor], true);
   for (const h of hits){
     let o = h.object;
+    if (!visibleMesh(o)) continue;
     if (o.material === glassMat) continue;
     if (o.userData.door) return {door:o.userData.door, dist:h.distance};
     if (o.userData.room) return {room:o.userData.room};
@@ -4835,7 +4845,7 @@ function groundAt(x, y){
   ray.setFromCamera(ptr, camera);
   if (!ray.ray.intersectPlane(ground0, hit) || hit.distanceTo(camera.position) > 60) return null;
   // 视线先碰到墙体（或飘窗台）时，落点取碰到的位置，而不是穿过墙落到看不见的墙后
-  const wall = ray.intersectObjects([archUp, archFloor], true).find(h => h.object.material !== glassMat && h.object.visible);
+  const wall = ray.intersectObjects([archUp, archFloor], true).find(h => visibleMesh(h.object) && h.object.material !== glassMat);
   if (wall && wall.distance < hit.distanceTo(camera.position) - .01) hit.set(wall.point.x, 0, wall.point.z);
   const px = v => new THREE.Vector2(v.x*r.width/2, v.y*r.height/2), a = px(hit.clone().project(camera));
   const s = Math.max(a.distanceTo(px(hit.clone().add(new THREE.Vector3(1, 0, 0)).project(camera))),
@@ -4942,7 +4952,7 @@ function stepWalk(dt){
 addEventListener('keydown', e => {
   if (!active || e.target.matches('input,select,textarea')) return;
   keys[e.code] = true;
-  if (opt.mode === 'walk' && e.code === 'KeyE'){ const h = pick(); if (h?.door && h.dist < 2.5) h.door.open = !h.door.open; }
+  if (opt.mode === 'walk' && e.code === 'KeyE'){ const h = pick(); if (h?.door && h.dist < 2.5) toggleDoor(h.door); }
 });
 addEventListener('keyup', e => keys[e.code] = false);
 

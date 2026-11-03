@@ -74,3 +74,33 @@ test('staff room labels migrate without discarding customized names or furniture
   assert.equal(run(`fixState({furniture:[{id:'kept'}],rooms:{'north-bed':{name:'自定义名称'}}}).rooms['north-bed'].name`),'自定义名称');
   assert.equal(run(`fixState({furniture:[{id:'kept'}]}).furniture[0].id`),'kept');
 });
+
+test('door picking ignores invisible geometry and outlines while respecting solid walls',()=>{
+  const ctx=vm.createContext({});
+  vm.runInContext(`const scene={},camera={},glassMat={},furnG={},archUp={},archFloor={},opt={furn:true};
+    const renderer={domElement:{getBoundingClientRect:()=>({left:0,top:0,width:600,height:600})}};
+    let hits=[];const ptr={set(){}},ray={setFromCamera(){},intersectObjects:()=>hits};
+    const door={open:true},leaf={isMesh:true,visible:true,material:{},userData:{door}};
+    const hiddenCeiling={isMesh:true,visible:false,material:{},userData:{}};
+    const outline={isMesh:false,visible:true,material:{},userData:{}};
+    const hiddenParent={isMesh:true,visible:true,material:{},userData:{},parent:{visible:false}};
+    const glass={isMesh:true,visible:true,material:glassMat,userData:{}};
+    const wall={isMesh:true,visible:true,material:{},userData:{}};
+    ${html.slice(html.indexOf('function visibleMesh('),html.indexOf('// 屏幕点 → 地面'))}`,ctx);
+  const pickRun=s=>vm.runInContext(s,ctx);
+  pickRun(`hits=[outline,hiddenCeiling,hiddenParent,glass,leaf].map((object,i)=>({object,distance:i+1}));`);
+  assert.equal(pickRun('pick({clientX:300,clientY:300}).door===door'),true);
+  assert.equal(pickRun('pick().dist'),5);
+  pickRun('hits=[{object:wall,distance:1},{object:leaf,distance:2}];');
+  assert.equal(pickRun('pick()'),null);
+  pickRun('hits=[{object:leaf,distance:1},{object:wall,distance:2}];');
+  assert.equal(pickRun('pick().door===door'),true);
+  vm.runInContext(`const notices=[];function toast(s){notices.push(s);}function tr(zh){return zh;}
+    ${html.slice(html.indexOf('function toggleDoor('),html.indexOf('function visibleMesh('))}
+    toggleDoor(pick().door);`,ctx);
+  assert.equal(pickRun('door.open'),false);
+  assert.equal(pickRun('notices[0]'),'门已关闭');
+  pickRun('toggleDoor(pick().door);');
+  assert.equal(pickRun('door.open'),true);
+  assert.equal(pickRun('notices[1]'),'门已打开');
+});
