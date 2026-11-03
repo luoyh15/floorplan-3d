@@ -28,6 +28,8 @@ Validation: `node --test tests/*.test.cjs`.
 
 The top and right boundaries have tiled masonry from floor level to 1000 mm, with glazing from 1000 to 3300 mm. The plan shows the glazing boundaries and 3D shows glass above the brick bases. The left and entrance sides remain solid walls.
 
+The lower-left washbasin is a 300 mm wide × 500 mm deep integrated rectangular basin: the bowl fills the top with only a narrow rim, and the tap is against the left wall. Both views use this shape. Older saves gain the new shape while retaining edited positions and dimensions.
+
 The user-specified drain diameter is **130 mm**: center x = **305 + 130/2 = 370 mm**, y = **1180 mm**. Both views show only a flush circular floor opening, without center lines, crosshairs or a projecting stub. The illustrative wall thickness is 3 mm. The 305 / 380 dimensions are drawn at the opening, which remains fixed when furniture moves.
 
 An independently editable representative toilet (366 mm wide × 700 mm deep × 698 mm high) supports moving, rotating and resizing. Dimensions reference Kohler NEW PATIO; the generic model is illustrative. Older saved bathrooms without a toilet receive one automatically, while subsequent edits persist.

@@ -2401,7 +2401,7 @@ const ORIGINAL_PLAN = {
 };
 // 净尺寸：左右 1700、上下 1800。用户确认的定位均以墙内皮 / 挡水条干区侧边为基准。
 const BATHROOM_PLAN = {
-  id:'bathroom-1800-1700',revision:12,name:'卫生间 · 1.8 × 1.7 m',nameEn:'Bathroom · 1.8 × 1.7 m',
+  id:'bathroom-1800-1700',revision:13,name:'卫生间 · 1.8 × 1.7 m',nameEn:'Bathroom · 1.8 × 1.7 m',
   summary:'卫生间 1.8 × 1.7 m',summaryEn:'Bathroom 1.8 × 1.7 m',
   ceilingHeight:3.3,center:[850,900],bounds:{x:-550,y:-500,w:2850,h:3400},
   walls:[[-100,0,0,1900,'e'],[0,1800,900,1900,'e'],[0,730,1700,800,'low',null,.05]],
@@ -2416,7 +2416,7 @@ const BATHROOM_PLAN = {
   wallTiles:{material:'tile800x400',xOffset:100,sideOffset:200},
   furniture:[{...F('shower','淋浴区',850,365,1700,730),hideLabel:true,tiledFloor:true},
     {...F('toilet','马桶',360,1180,366,700,270),height:698,hideLabel:true},
-    F('vanity','洗手台',250,1650,300,500,270)],
+    {...F('vanity','洗手台',250,1650,300,500,270),basinStyle:'full-rect'}],
   pipes:[{id:'wc-drain',cx:370,cy:1180,outerDiameter:130,wallThickness:3,height:0,color:'#c8cdd0'}],
   unverified:true,roomLabelSize:100,entryFontSize:75,
   dimensionStyle:{fontSize:80,tickSize:55,slashSize:22,textOffset:28},
@@ -2436,8 +2436,8 @@ const BATHROOM_PLAN = {
     en:'Shower depth 730 mm, curb width 70 mm, dry area depth 1000 mm. 800 × 400 mm warm gray tiles with stacked joints; wall rows 400 mm high. Start full floor tiles at the doorway: 400 + 400 + 200 mm to the curb. Cut around the curb and continue the same grid inward: 130 + 400 + 200 mm to the shower wall. Assumed columns 100 + 800 + 800 mm; 2 mm grout.'},
     {zh:'下水口直径按用户指定为 130 mm；左缘距左墙 305 mm，中心坐标 (370,1180) mm，中心距 70 mm 宽挡水条的干区侧边 380 mm。',
     en:'User-specified drain diameter 130 mm; left edge 305 mm from left wall, center (370,1180) mm, 380 mm from the dry-side edge of the 70 mm curb.'},
-    {zh:'马桶采用 366 × 700 mm、总高 698 mm 的典型尺寸示意，可独立拖动、旋转、改尺寸；不绑定管道。门向内开，暂定宽 800 mm；左下角洗手台宽 300 × 深 500 mm，龙头靠左墙，选中查看尺寸，无常驻尺寸标注。挡水条高 50 mm。',
-    en:'Representative toilet: 366 × 700 mm, height 698 mm, independently movable and resizable. Door opens inward, assumed 800 mm wide. Lower-left washbasin: width 300 mm, depth 500 mm, tap against the left wall; select to inspect dimensions, without persistent dimension labels. Curb height 50 mm.'}],
+    {zh:'马桶采用 366 × 700 mm、总高 698 mm 的典型尺寸示意，可独立拖动、旋转、改尺寸；不绑定管道。门向内开，暂定宽 800 mm；左下角洗手台宽 300 × 深 500 mm，为整面矩形一体盆，仅保留窄盆沿，龙头靠左墙，选中查看尺寸，无常驻尺寸标注。挡水条高 50 mm。',
+    en:'Representative toilet: 366 × 700 mm, height 698 mm, independently movable and resizable. Door opens inward, assumed 800 mm wide. Lower-left washbasin: width 300 mm, depth 500 mm, with a full rectangular basin and narrow rim, tap against the left wall; select to inspect dimensions, without persistent dimension labels. Curb height 50 mm.'}],
   sources:[
     {label:'Kohler NEW PATIO 700 × 366 × 698 mm',url:'https://files.kohler.com.cn/book_files/contentPic/cid2/32.2024%E5%B9%B4%20%E5%BA%A7%E4%BE%BF%E5%99%A8%E5%8F%8A%E7%9B%96%E6%9D%BF.pdf'}
   ],
@@ -2568,6 +2568,10 @@ function fixState(s){
       Object.assign(basin,{w:300,d:500,cx:250,cy:1650,rot:270});
       delete basin.showDimensions;
     }
+  }
+  if(PLAN_ID==='bathroom-1800-1700' && oldRevision<13){
+    const basin=s.furniture.find(f=>f.type==='vanity' && f.name==='洗手台') || s.furniture.find(f=>f.type==='vanity');
+    if(basin) basin.basinStyle='full-rect';
   }
   if(PLAN_ID==='img-0914') for(const [id,oldName] of [['north-bed','北卧室'],['north-bath','北卫浴']]){
     if(s.rooms[id].name===oldName) s.rooms[id].name=d.rooms[id].name;
@@ -2760,7 +2764,15 @@ function furnSVG(t,w,d,c,options={}){
     case 'ksink': return rc(x,y,w,d,c,'rx="20"') + rc(x+w*.06,y+d*.18,w*.42,d*.66,'#fff','rx="50"') + rc(x+w*.52,y+d*.18,w*.42,d*.66,'#fff','rx="50"') + `<circle cx="0" cy="${y+d*.09}" r="22" fill="#999"/>`;
     case 'fridge': return rc(x,y,w,d,c,'rx="30"') + ln(x,y+d*.14,x+w,y+d*.14) + ln(0,y+d*.14,0,y+d) + rc(-70,y+d*.5,40,d*.25,'#aab') + rc(30,y+d*.5,40,d*.25,'#aab');
     case 'toilet': return rc(x+w*.04,y,w*.92,d*.27,c,'rx="30"') + ec(0,y+d*.27+d*.36,w*.47,d*.36,c) + ec(0,y+d*.27+d*.4,w*.3,d*.24,'#eef4f7');
-    case 'vanity': return rc(x,y,w,d,c,'rx="20"') + ec(0,y+d*.57,Math.min(w*.32,260),d*.28,'#fff') + `<circle cx="0" cy="${y+d*.17}" r="26" fill="#999"/>`;
+    case 'vanity': {
+      if(options.basinStyle==='full-rect'){
+        const rim=Math.min(15,w*.08,d*.08),tap=Math.min(18,w*.06);
+        return `<g class="integrated-basin">${rc(x,y,w,d,'#fff','rx="6"')}${rc(x+rim,y+rim,w-2*rim,d-2*rim,'#eaf1f3','rx="4"')}
+          <circle cx="0" cy="${d*.12}" r="${Math.min(12,w*.04)}" fill="#adb8bc" ${ST}/>
+          ${ln(0,y+tap,0,y+Math.min(125,d*.34))}<circle cx="0" cy="${y+tap}" r="${tap}" fill="#999" ${ST}/></g>`;
+      }
+      return rc(x,y,w,d,c,'rx="20"') + ec(0,y+d*.57,Math.min(w*.32,260),d*.28,'#fff') + `<circle cx="0" cy="${y+d*.17}" r="26" fill="#999"/>`;
+    }
     case 'shower': return options.tiledFloor ? rc(x,y,w,d,'transparent') + ln(x,y+d,x+w,y+d,'stroke-opacity=".4"')
       : rc(x,y,w,d,c) + ln(x,y,x+w,y+d,DASH) + ln(x+w,y,x,y+d,DASH) + `<circle r="45" fill="#fff" ${ST}/>`;
     case 'bathtub': return rc(x,y,w,d,c,'rx="40"') + rc(x+80,y+80,w-160,d-160,'#fff',`rx="${m*.33}"`) + `<circle cx="${x+w-260}" cy="0" r="35" fill="#ccc" ${ST}/>`;
@@ -4318,18 +4330,30 @@ function buildFurniture(f){
     }
     case 'vanity': {
       const vm = mat(c, {roughness:.5}), stone = mat('#fafafa', {roughness:.18}), nb = w >= 1.1 ? 2 : 1, cd = d - .04, cm = chrome();
-      g.add(rbox(w, .45, cd, vm, 0, .33, bz + cd/2, .008));
-      fronts(g, -w/2 + .005, .335, w - .01, .44, d/2 - .04, nb, 2, vm, 'edge');
-      g.add(rbox(w, .03, d, stone, 0, .78, 0, .006));
-      const rb = Math.min(.19, w/nb*.36);
-      for (let i = 0; i < nb; i++){
-        const x = nb === 1 ? 0 : (i ? w/4 : -w/4);
-        g.add(lathe([[0, 0], [rb*.55, 0], [rb*.85, .03], [rb, .1], [rb*.97, .12]], ceramic({side:THREE.DoubleSide}), x, .81, .03, 40), cyl(.018, .018, .003, cm, x, .812, .03, 16));
-        g.add(cyl(.02, .022, .02, cm, x, .81, bz + .06, 16), tube([[x, .83, bz + .06], [x, 1.03, bz + .06], [x, 1.07, bz + .11], [x, 1.03, bz + .15]], .01, cm), rot(box(.01, .01, .06, cm, x, 1.05, bz + .04), .4));
+      const fullBasin=f.basinStyle==='full-rect',cabinetHeight=fullBasin ? .36 : .45;
+      g.add(rbox(w, cabinetHeight, cd, vm, 0, .33, bz + cd/2, .008));
+      fronts(g, -w/2 + .005, .335, w - .01, cabinetHeight-.01, d/2 - .04, nb, 2, vm, 'edge');
+      if(fullBasin){
+        const cer=ceramic(),rim=Math.min(.015,w*.08,d*.08),r=Math.min(.006,w*.02,d*.02);
+        // 整面一体盆：中空矩形盆壁和盆底，盆口下方不铺实心台面。
+        g.add(shell(w,d,.14,rim,r,cer,0,.69),rbox(w-2*rim,.01,d-2*rim,cer,0,.69,0,r));
+        g.add(cyl(Math.min(.012,w*.04),Math.min(.012,w*.04),.002,cm,0,.701,d*.12,20));
+        const reach=Math.min(.16,d*.38);
+        g.add(rod([0,.94,bz],[0,.94,bz+.035],.018,cm),
+          tube([[0,.94,bz+.02],[0,.99,bz+.05],[0,.99,bz+reach],[0,.95,bz+reach]],.01,cm),
+          box(.012,.012,.055,cm,.025,.96,bz+.03));
+      } else {
+        g.add(rbox(w, .03, d, stone, 0, .78, 0, .006));
+        const rb = Math.min(.19, w/nb*.36);
+        for (let i = 0; i < nb; i++){
+          const x = nb === 1 ? 0 : (i ? w/4 : -w/4);
+          g.add(lathe([[0, 0], [rb*.55, 0], [rb*.85, .03], [rb, .1], [rb*.97, .12]], ceramic({side:THREE.DoubleSide}), x, .81, .03, 40), cyl(.018, .018, .003, cm, x, .812, .03, 16));
+          g.add(cyl(.02, .022, .02, cm, x, .81, bz + .06, 16), tube([[x, .83, bz + .06], [x, 1.03, bz + .06], [x, 1.07, bz + .11], [x, 1.03, bz + .15]], .01, cm), rot(box(.01, .01, .06, cm, x, 1.05, bz + .04), .4));
+        }
       }
       const mw = Math.min(w*.9, nb*.7);
       g.add(rbox(mw + .02, .82, .02, glowMat('#fff7e6', '#ffe9c4', .9), 0, 1.14, bz + .01, .01), box(mw, .8, .01, mirror(), 0, 1.15, bz + .025));
-      g.add(cyl(.028, .028, .12, mat('#c8b8a6', {roughness:.3}), w/2 - .08, .81, bz + .1, 16), rbox(.18, .03, .12, fabric('#e9e2d6'), -w/2 + .12, .81, .05, .012));
+      if(!fullBasin) g.add(cyl(.028, .028, .12, mat('#c8b8a6', {roughness:.3}), w/2 - .08, .81, bz + .1, 16), rbox(.18, .03, .12, fabric('#e9e2d6'), -w/2 + .12, .81, .05, .012));
       break;
     }
     case 'shower': {

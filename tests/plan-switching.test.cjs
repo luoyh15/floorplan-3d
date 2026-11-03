@@ -120,7 +120,7 @@ test('bathroom glazing replaces the upper top and right walls and preserves save
   first.run(`state.planRevision=11;state.furniture.find(f=>f.type==='toilet').cx=820;
     state.demolished=['w4'];save();`);
   const {run}=app(Object.fromEntries(first.storage));
-  assert.equal(run('state.planRevision'),12);
+  assert.equal(run('state.planRevision'),run('activePlan.revision'));
   assert.equal(run('state.furniture.find(f=>f.type==="toilet").cx'),820);
   assert.equal(run('state.demolished.join(",")'),'w2');
   assert.equal(run('WINS.length'),2);
@@ -278,4 +278,18 @@ test('previous bathroom saves gain one washbasin while keeping existing furnitur
   reopened.run(`state.furniture=state.furniture.filter(f=>f.type!=='vanity');save();`);
   const removed=app(Object.fromEntries(reopened.storage));
   assert.equal(removed.run('state.furniture.some(f=>f.type==="vanity")'),false);
+});
+
+test('saved bathroom washbasins become full rectangular basins without resetting placement or dimensions',async()=>{
+  const first=app();await first.run(`switchPlan('bathroom-1800-1700')`);
+  first.run(`state.planRevision=12;const basin=state.furniture.find(f=>f.type==='vanity');
+    delete basin.basinStyle;Object.assign(basin,{cx:320,cy:1500,w:340,d:520,rot:180});save();`);
+  const updated=app(Object.fromEntries(first.storage));
+  assert.equal(updated.run(`state.furniture.find(f=>f.type==='vanity').basinStyle`),'full-rect');
+  assert.equal(updated.run(`(()=>{const f=state.furniture.find(f=>f.type==='vanity');return [f.cx,f.cy,f.w,f.d,f.rot].join(',');})()`),'320,1500,340,520,180');
+  assert.equal(updated.run(`exportPlanDocument().state.furniture.find(f=>f.type==='vanity').basinStyle`),'full-rect');
+  assert.equal(updated.run(`findPlan('original').furniture.some(f=>f.basinStyle==='full-rect')`),false);
+  const snapshot=JSON.parse(fs.readFileSync(path.join(__dirname,'../floorplans/bathroom-1800-1700.json'),'utf8'));
+  assert.equal(snapshot.plan.furniture.find(f=>f.type==='vanity').basinStyle,'full-rect');
+  assert.equal(snapshot.state.furniture.find(f=>f.type==='vanity').basinStyle,'full-rect');
 });

@@ -3,7 +3,7 @@
   "version": 2,
   "plan": {
     "id": "bathroom-1800-1700",
-    "revision": 12,
+    "revision": 13,
     "name": "卫生间 · 1.8 × 1.7 m",
     "nameEn": "Bathroom · 1.8 × 1.7 m",
     "summary": "卫生间 1.8 × 1.7 m",
@@ -198,7 +198,8 @@
         "w": 300,
         "d": 500,
         "rot": 270,
-        "color": "#eef1f3"
+        "color": "#eef1f3",
+        "basinStyle": "full-rect"
       }
     ],
     "pipes": [
@@ -346,8 +347,8 @@
         "en": "User-specified drain diameter 130 mm; left edge 305 mm from left wall, center (370,1180) mm, 380 mm from the dry-side edge of the 70 mm curb."
       },
       {
-        "zh": "马桶采用 366 × 700 mm、总高 698 mm 的典型尺寸示意，可独立拖动、旋转、改尺寸；不绑定管道。门向内开，暂定宽 800 mm；左下角洗手台宽 300 × 深 500 mm，龙头靠左墙，选中查看尺寸，无常驻尺寸标注。挡水条高 50 mm。",
-        "en": "Representative toilet: 366 × 700 mm, height 698 mm, independently movable and resizable. Door opens inward, assumed 800 mm wide. Lower-left washbasin: width 300 mm, depth 500 mm, tap against the left wall; select to inspect dimensions, without persistent dimension labels. Curb height 50 mm."
+        "zh": "马桶采用 366 × 700 mm、总高 698 mm 的典型尺寸示意，可独立拖动、旋转、改尺寸；不绑定管道。门向内开，暂定宽 800 mm；左下角洗手台宽 300 × 深 500 mm，为整面矩形一体盆，仅保留窄盆沿，龙头靠左墙，选中查看尺寸，无常驻尺寸标注。挡水条高 50 mm。",
+        "en": "Representative toilet: 366 × 700 mm, height 698 mm, independently movable and resizable. Door opens inward, assumed 800 mm wide. Lower-left washbasin: width 300 mm, depth 500 mm, with a full rectangular basin and narrow rim, tap against the left wall; select to inspect dimensions, without persistent dimension labels. Curb height 50 mm."
       }
     ],
     "sources": [
@@ -403,7 +404,7 @@
   },
   "state": {
     "planId": "bathroom-1800-1700",
-    "planRevision": 12,
+    "planRevision": 13,
     "furniture": [
       {
         "id": "fmw0vkkg174",
@@ -440,7 +441,8 @@
         "w": 300,
         "d": 500,
         "rot": 270,
-        "color": "#eef1f3"
+        "color": "#eef1f3",
+        "basinStyle": "full-rect"
       }
     ],
     "rooms": {
