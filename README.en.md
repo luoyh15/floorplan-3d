@@ -10,7 +10,7 @@ The default layout is reconstructed from the supplied IMG_0914 photo: four bedro
 
 Interior walls use `u` (structural properties unverified) and can be highlighted with “Unverified walls”; their removal is disabled. Exterior walls use `e`.
 
-Use the top Layout selector to switch between the corrected four-bedroom layout the original three-bedroom layout, and the 1.8 × 1.7 m bathroom. Furniture, room names, flooring, wall changes and measurements save independently; switching saves the outgoing layout and reopening restores the last selection. Switching works in both 2D and 3D.
+Use the top Layout selector to switch between the corrected four-bedroom layout, Example (the three-bedroom layout), and the 1.8 × 1.7 m bathroom. Furniture, room names, flooring, wall changes and measurements save independently; switching saves the outgoing layout and reopening restores the last selection. Switching works in both 2D and 3D.
 
 “Save layout” writes the current arrangement and a complete layout snapshot to browser storage. “File → Export layout JSON” exports structure and arrangement. “Import layout / plan” adds other complete layouts; matching layouts restore their arrangement and different structures create new entries. Legacy arrangement-only JSON selects its corresponding layout automatically.
 
