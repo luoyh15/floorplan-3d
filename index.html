@@ -2401,12 +2401,13 @@ const ORIGINAL_PLAN = {
 };
 // 净尺寸：左右 1700、上下 1800。用户确认的定位均以墙内皮 / 挡水条干区侧边为基准。
 const BATHROOM_PLAN = {
-  id:'bathroom-1800-1700',revision:11,name:'卫生间 · 1.8 × 1.7 m',nameEn:'Bathroom · 1.8 × 1.7 m',
+  id:'bathroom-1800-1700',revision:12,name:'卫生间 · 1.8 × 1.7 m',nameEn:'Bathroom · 1.8 × 1.7 m',
   summary:'卫生间 1.8 × 1.7 m',summaryEn:'Bathroom 1.8 × 1.7 m',
   ceilingHeight:3.3,center:[850,900],bounds:{x:-550,y:-500,w:2850,h:3400},
-  walls:[[-100,-100,1800,0,'e'],[-100,0,0,1900,'e'],[1700,0,1800,1900,'e'],
-    [0,1800,900,1900,'e'],[0,730,1700,800,'low',null,.05]],
-  windows:[],doors:[{name:'卫生间门',rect:[900,1800,1700,1900],h:[1700,1800],c:[-1,0],o:[0,-1],len:800,entry:true}],
+  walls:[[-100,0,0,1900,'e'],[0,1800,900,1900,'e'],[0,730,1700,800,'low',null,.05]],
+  windows:[{id:'bathroom-top-glass',a:[-100,-50],b:[1800,-50],t:100,sill:1,head:3.3},
+    {id:'bathroom-right-glass',a:[1750,0],b:[1750,1900],t:100,sill:1,head:3.3}],
+  doors:[{name:'卫生间门',rect:[900,1800,1700,1900],h:[1700,1800],c:[-1,0],o:[0,-1],len:800,entry:true}],
   slides:[],rooms:[{id:'bathroom',name:'卫生间',poly:R(0,0,1700,1800),mat:'tile800x400'}],
   // 干区固定 1000 mm；从门口起铺，同一砖网在挡水条 y=730–800 处切开。
   floorLayout:{room:'bathroom',material:'tile800x400',width:1700,depth:1800,
@@ -2429,7 +2430,9 @@ const BATHROOM_PLAN = {
     {type:'dimension',a:[0,1180],b:[305,1180],label:'305',labelAt:[152.5,1130],fontSize:70,color:'#b5653a'},
     {type:'text',at:[850,1170],leader:[[435,1180],[530,1140],[600,1140]],label:'下水口 Φ130',labelEn:'Drain Ø130',fontSize:75,color:'#b74339'},
   ],
-  notes:[{zh:'淋浴区深 730 mm、挡水条宽 70 mm、干区深 1000 mm。瓷砖 800 × 400 mm，浅灰米色横向对缝，墙砖高 400 mm。地砖从门口整砖起铺，向内依次 400 + 400 + 200 mm 到挡水条；在挡水条处切开，沿原砖缝继续向淋浴区铺 130 + 400 + 200 mm 到墙。横向暂排 100 + 800 + 800 mm，砖缝示意 2 mm。',
+  notes:[{zh:'上侧和右侧墙体从地面起 1000 mm 为砖墙并铺墙砖，以上至 3300 mm 为玻璃；左侧与门侧保留实墙。',
+    en:'The top and right boundaries have tiled masonry from floor level to 1000 mm, with glazing above to 3300 mm. The left and entrance sides remain solid walls.'},
+    {zh:'淋浴区深 730 mm、挡水条宽 70 mm、干区深 1000 mm。瓷砖 800 × 400 mm，浅灰米色横向对缝，墙砖高 400 mm。地砖从门口整砖起铺，向内依次 400 + 400 + 200 mm 到挡水条；在挡水条处切开，沿原砖缝继续向淋浴区铺 130 + 400 + 200 mm 到墙。横向暂排 100 + 800 + 800 mm，砖缝示意 2 mm。',
     en:'Shower depth 730 mm, curb width 70 mm, dry area depth 1000 mm. 800 × 400 mm warm gray tiles with stacked joints; wall rows 400 mm high. Start full floor tiles at the doorway: 400 + 400 + 200 mm to the curb. Cut around the curb and continue the same grid inward: 130 + 400 + 200 mm to the shower wall. Assumed columns 100 + 800 + 800 mm; 2 mm grout.'},
     {zh:'下水口直径按用户指定为 130 mm；左缘距左墙 305 mm，中心坐标 (370,1180) mm，中心距 70 mm 宽挡水条的干区侧边 380 mm。',
     en:'User-specified drain diameter 130 mm; left edge 305 mm from left wall, center (370,1180) mm, 380 mm from the dry-side edge of the 70 mm curb.'},
@@ -2569,6 +2572,9 @@ function fixState(s){
   if(PLAN_ID==='img-0914') for(const [id,oldName] of [['north-bed','北卧室'],['north-bath','北卫浴']]){
     if(s.rooms[id].name===oldName) s.rooms[id].name=d.rooms[id].name;
   }
+  if(PLAN_ID==='bathroom-1800-1700' && oldRevision<12 && Array.isArray(s.demolished)){
+    s.demolished=s.demolished.filter(id=>id==='w4').map(()=>'w2');
+  }
   s.demolished=Array.isArray(s.demolished) ? s.demolished.filter(id=>/^w\d+$/.test(id) && ['n','low'].includes(WALLS[+id.slice(1)]?.[4])) : [];
   s.measures=Array.isArray(s.measures) ? s.measures.filter(m=>m && [m.a?.x,m.a?.y,m.b?.x,m.b?.y].every(Number.isFinite)) : [];
   return s;
@@ -2619,7 +2625,12 @@ function aabb(f){ const a = f.rot*Math.PI/180, c = Math.abs(Math.cos(a)), s = Ma
 const fmt = (n, d=2) => n.toFixed(d);
 const norm = a => ((Math.round(a) % 360) + 360) % 360;
 const wallPoly = w => w[5] || R(w[0],w[1],w[2],w[3]);
-const windowWall = w => segmentWall(w.a,w.b,w.t);
+const windowWall = w => {
+  const r=segmentWall(w.a,w.b,w.t);
+  // 正交窗台使用矩形墙体路径，以沿用墙砖纹理；斜窗保留真实多边形。
+  if(w.a[0]===w.b[0] || w.a[1]===w.b[1]) r[5]=null;
+  return r;
+};
 function windowLeaf(w){
   const dx=w.b[0]-w.a[0],dy=w.b[1]-w.a[1],len=Math.hypot(dx,dy);
   const h=w.hinge==='b' ? w.b : w.a, end=w.hinge==='b' ? w.a : w.b;

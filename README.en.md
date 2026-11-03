@@ -26,6 +26,8 @@ Validation: `node --test tests/*.test.cjs`.
 
 `floorplans/bathroom-1800-1700.json` stores a clear 1700 mm width × 1800 mm depth bathroom. The top shower is 730 mm deep; the 70 mm curb spans y=730–800 mm, keeping the dry area 1000 mm deep. The pipe left edge is 305 mm from the left wall and its center is 380 mm from the dry-side curb edge, giving y=1180 mm.
 
+The top and right boundaries have tiled masonry from floor level to 1000 mm, with glazing from 1000 to 3300 mm. The plan shows the glazing boundaries and 3D shows glass above the brick bases. The left and entrance sides remain solid walls.
+
 The user-specified drain diameter is **130 mm**: center x = **305 + 130/2 = 370 mm**, y = **1180 mm**. Both views show only a flush circular floor opening, without center lines, crosshairs or a projecting stub. The illustrative wall thickness is 3 mm. The 305 / 380 dimensions are drawn at the opening, which remains fixed when furniture moves.
 
 An independently editable representative toilet (366 mm wide × 700 mm deep × 698 mm high) supports moving, rotating and resizing. Dimensions reference Kohler NEW PATIO; the generic model is illustrative. Older saved bathrooms without a toilet receive one automatically, while subsequent edits persist.

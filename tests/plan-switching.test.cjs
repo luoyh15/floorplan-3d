@@ -115,6 +115,26 @@ test('committed JSON snapshots are valid full layouts including the corrected wi
   assert.equal(mine.plan.rooms.find(r=>r.id==='north-bed').name,'保姆房');
 });
 
+test('bathroom glazing replaces the upper top and right walls and preserves saved arrangements',async()=>{
+  const first=app();await first.run(`switchPlan('bathroom-1800-1700')`);
+  first.run(`state.planRevision=11;state.furniture.find(f=>f.type==='toilet').cx=820;
+    state.demolished=['w4'];save();`);
+  const {run}=app(Object.fromEntries(first.storage));
+  assert.equal(run('state.planRevision'),12);
+  assert.equal(run('state.furniture.find(f=>f.type==="toilet").cx'),820);
+  assert.equal(run('state.demolished.join(",")'),'w2');
+  assert.equal(run('WINS.length'),2);
+  assert.equal(run('WINS.every(w=>w.sill===1 && w.head===CEILING_HEIGHT && !w.casement)'),true);
+  const bases=JSON.parse(run('JSON.stringify(WINS.map(windowWall))'));
+  assert.deepEqual(bases.map(w=>w.slice(0,4)),[[-100,-100,1800,0],[1700,0,1800,1900]]);
+  assert.ok(bases.every(w=>w[5]===null));
+  assert.equal(run('WALLS.some(w=>w[0]===1700 || w[1]===-100)'),false);
+  assert.equal(run('validPlan(activePlan)'),true);
+  const snapshot=JSON.parse(fs.readFileSync(path.join(__dirname,'../floorplans/bathroom-1800-1700.json'),'utf8'));
+  assert.deepEqual(snapshot.plan.windows,JSON.parse(run('JSON.stringify(WINS)')));
+  assert.deepEqual(snapshot.plan.walls,JSON.parse(run('JSON.stringify(WALLS)')));
+});
+
 test('explicit save keeps a complete snapshot of the current structure and arrangement',()=>{
   const {run,storage}=app();run(`state.rooms.master.name='保存的房间';state.furniture[0].cx=8720;saveCurrentPlan();`);
   const snapshot=JSON.parse(storage.get('huxing-snapshot-img-0914-v1'));
@@ -179,7 +199,7 @@ test('old bathroom layouts receive one freely movable toilet and a fixed drain o
   const reopened=app(Object.fromEntries(base.storage));
   assert.equal(reopened.run('state.furniture.filter(f=>f.type==="toilet").length'),1);
   assert.equal(reopened.run('state.rooms.bathroom.name'),'保留名称');
-  assert.equal(reopened.run('state.planRevision'),11);
+  assert.equal(reopened.run('state.planRevision'),reopened.run('activePlan.revision'));
   reopened.run(`const f=state.furniture.find(f=>f.type==='toilet');f.cx=900;f.cy=1400;f.rot=90;save();`);
   const moved=app(Object.fromEntries(reopened.storage));
   assert.equal(moved.run('state.furniture.find(f=>f.type==="toilet").cx'),900);
