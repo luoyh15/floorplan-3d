@@ -293,3 +293,49 @@ test('saved bathroom washbasins become full rectangular basins without resetting
   assert.equal(snapshot.plan.furniture.find(f=>f.type==='vanity').basinStyle,'full-rect');
   assert.equal(snapshot.state.furniture.find(f=>f.type==='vanity').basinStyle,'full-rect');
 });
+
+const scanFixture=JSON.parse(fs.readFileSync(path.join(__dirname,'../ios/Fixtures/demo-scan.json'),'utf8'));
+test('iOS scan imports into an editable layout with metric dimensions and real door/window gaps',async()=>{
+  const {run,storage}=app();
+  assert.equal(await run(`importPlanDocument(${JSON.stringify(scanFixture)})`),true);
+  assert.equal(run('PLAN_ID'),'scan-'+scanFixture.id);
+  assert.equal(run('validPlan(activePlan)'),true);
+  assert.equal(run('area(ROOMS[0].poly)'),12);
+  assert.equal(run('CEILING_HEIGHT'),2.8);
+  assert.equal(run('WINS[0].sill'),1);
+  assert.equal(run('Math.abs(WINS[0].head-2.2)<1e-9'),true);
+  assert.equal(run('DOORS[0].len'),800);
+  assert.equal(run('DOORS[0].height'),2);
+  assert.equal(run('DOORS[0].o[1]'),-1);
+  assert.equal(run('WALLS.some(w=>pointInPoly(2000,0,wallPoly(w)))'),false);
+  assert.equal(run('WALLS.some(w=>pointInPoly(3400,3000,wallPoly(w)))'),false);
+  assert.equal(run('state.furniture[0].w'),2000);
+  assert.equal(run('state.furniture[0].d'),800);
+  assert.equal(run('state.furniture[0].scanHeight'),800);
+  assert.equal(run('state.furniture[0].cy'),1500);
+  assert.equal(run('activePlan.unverified'),true);
+  const reopened=app(Object.fromEntries(storage));
+  assert.equal(reopened.run('PLAN_ID'),'scan-'+scanFixture.id);
+  assert.equal(reopened.run('state.furniture[0].w'),2000);
+});
+
+test('iOS scan conversion preserves concave floors, rotated objects and elevated objects',()=>{
+  const {run}=app();const scan=structuredClone(scanFixture);
+  scan.floors[0].corners=[[0,0,0],[4,0,0],[4,0,1],[2,0,1],[2,0,3],[0,0,3]];
+  scan.objects[0].xAxis=[0,0,1];scan.objects[0].center[1]=1;
+  run(`const converted=convertScanDocument(${JSON.stringify(scan)});`);
+  assert.equal(run('area(converted.plan.rooms[0].poly)'),8);
+  assert.equal(run('converted.state.furniture[0].rot'),90);
+  assert.equal(run('converted.state.furniture[0].scanElevation'),600);
+});
+
+test('malformed or incomplete iOS scans never overwrite the current layout',async()=>{
+  const {run}=app();run('state.furniture[0].cx=8765;');
+  for(const change of [s=>s.units='mm',s=>s.floors=[],s=>s.objects[0].size[0]=-1,
+    s=>s.surfaces[4].center=[100,1.6,100],s=>s.surfaces.push({...s.surfaces[4],id:'overlap'}),
+    s=>s.surfaces[0].xAxis=[0,0,0]]){
+    const invalid=structuredClone(scanFixture);change(invalid);
+    await assert.rejects(()=>run(`importPlanDocument(${JSON.stringify(invalid)})`));
+    assert.equal(run('PLAN_ID'),'img-0914');assert.equal(run('state.furniture[0].cx'),8765);
+  }
+});

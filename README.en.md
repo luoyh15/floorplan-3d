@@ -22,6 +22,12 @@ Coordinates are in mm, with the origin at the intersection of the western main-b
 
 Validation: `node --test tests/*.test.cjs`.
 
+## iPhone room scanning
+
+The companion [iOS scanner](ios/README.md) uses Apple RoomPlan and LiDAR for live single-room capture, interactive 3D review, local scan history, measured object dimensions, and USDZ / JSON exports. Open `ios/RoomScanner.xcodeproj` in Xcode and configure signing for a LiDAR-equipped iPhone.
+
+The web editor's layout import accepts the app's `floorplan-scan.json`, converts meters to millimeters, preserves floor polygons, cuts door/window openings, and creates a separate editable layout with scaled generic furniture. Try `ios/Fixtures/demo-scan.json`. Measurements, assumed wall thickness and door swings need verification. The development machine lacks full Xcode; iOS SDK compilation and physical-device scanning remain unverified.
+
 ## Standalone bathroom
 
 `floorplans/bathroom-1800-1700.json` stores a clear 1700 mm width × 1800 mm depth bathroom. The top shower is 730 mm deep; the 70 mm curb spans y=730–800 mm, keeping the dry area 1000 mm deep. The pipe left edge is 305 mm from the left wall and its center is 380 mm from the dry-side curb edge, giving y=1180 mm.

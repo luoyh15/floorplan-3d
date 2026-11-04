@@ -20,6 +20,9 @@ npm-debug.log*
 .cache/
 tmp/
 .netlify/
+DerivedData/
+xcuserdata/
+*.xcuserstate
 
 # 环境变量
 .env

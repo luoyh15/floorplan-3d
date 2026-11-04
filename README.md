@@ -22,6 +22,12 @@
 
 验证：`node --test tests/*.test.cjs`。
 
+## iPhone 扫描建模
+
+配套 [iOS 户型扫描应用](ios/README.md) 使用 Apple RoomPlan 和 LiDAR 实时扫描单个房间，提供 3D 预览、本机历史、家具尺寸列表和 USDZ / JSON 导出。用 Xcode 打开 `ios/RoomScanner.xcodeproj`，配置个人签名后在带 LiDAR 的 iPhone 上运行。
+
+网页的“文件 → 导入户型 / 方案”支持该应用导出的 `floorplan-scan.json`：自动换算米到毫米，转换墙、门窗、地面多边形与家具位置、旋转、尺寸，创建独立的可编辑户型。可用 `ios/Fixtures/demo-scan.json` 测试。扫描值、推定墙厚及门向需复核。当前机器未安装完整 Xcode，iOS SDK 编译和真机扫描尚待验证。
+
 ## 卫生间独立户型
 
 `floorplans/bathroom-1800-1700.json` 保存净尺寸左右 1700 mm、上下 1800 mm 的卫生间，可从顶部户型列表直接选择。顶部淋浴深 730 mm，挡水条平面宽 70 mm，占纵坐标 730–800 mm，干区保持 1000 mm。下水管道左边缘距左墙 305 mm，管道中心距挡水条靠马桶一侧边缘 380 mm，因此中心纵坐标为 y=1180 mm。

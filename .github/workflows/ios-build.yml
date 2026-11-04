@@ -1,0 +1,45 @@
+name: iOS scanner build
+
+on:
+  push:
+    paths:
+      - 'ios/**'
+      - 'index.html'
+      - 'tests/**'
+      - '.github/workflows/ios-build.yml'
+  pull_request:
+    paths:
+      - 'ios/**'
+      - 'index.html'
+      - 'tests/**'
+      - '.github/workflows/ios-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Show Xcode version
+        run: xcodebuild -version
+      - name: Validate project metadata
+        run: plutil -lint ios/RoomScanner.xcodeproj/project.pbxproj ios/RoomScanner/Info.plist ios/RoomScanner/PrivacyInfo.xcprivacy
+      - name: Check scan serialization and local persistence
+        run: |
+          swiftc -module-cache-path "$RUNNER_TEMP/RoomScannerModuleCache" ios/RoomScanner/ScanDocument.swift ios/RoomScanner/ScanArchive.swift ios/Tests/main.swift -o "$RUNNER_TEMP/RoomScannerCoreTests"
+          "$RUNNER_TEMP/RoomScannerCoreTests" ios/Fixtures/demo-scan.json
+      - name: Build for iOS Simulator without signing
+        run: xcodebuild -project ios/RoomScanner.xcodeproj -scheme RoomScanner -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/RoomScannerDerived" CODE_SIGNING_ALLOWED=NO build
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/*.test.cjs

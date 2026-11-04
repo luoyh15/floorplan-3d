@@ -2487,7 +2487,8 @@ function validPlan(p){
     new Set(p.rooms.map(r=>r.id)).size===p.rooms.length &&
     Array.isArray(p.walls) && p.walls.length<=5000 && p.walls.every(w=>rect(w) && ['b','e','n','u','low'].includes(w[4]) && (w[6]===undefined || (Number.isFinite(w[6]) && w[6]>0 && w[6]<=p.ceilingHeight))) &&
     Array.isArray(p.windows) && p.windows.length<=5000 && p.windows.every(w=>point(w.a) && point(w.b) && Math.hypot(w.a[0]-w.b[0],w.a[1]-w.b[1])>0 && Number.isFinite(w.t) && w.t>0 && Number.isFinite(w.sill) && w.sill>=0 && Number.isFinite(w.head) && w.head>w.sill && (!w.casement || ['a','b'].includes(w.hinge)) && (!w.id || /^[a-z0-9_-]{1,80}$/i.test(w.id))) &&
-    Array.isArray(p.doors) && p.doors.every(d=>rect(d.rect) && point(d.h) && vector(d.c) && vector(d.o) && Number.isFinite(d.len) && d.len>0) &&
+    Array.isArray(p.doors) && p.doors.every(d=>rect(d.rect) && point(d.h) && vector(d.c) && vector(d.o) && Number.isFinite(d.len) && d.len>0 &&
+      (d.height===undefined || (Number.isFinite(d.height) && d.height>0 && d.height<=p.ceilingHeight))) &&
     Array.isArray(p.slides) && p.slides.every(d=>rect(d.rect)) && validFurniture(p.furniture) &&
     Array.isArray(p.dimensions) && p.dimensions.every(d=>Number.isFinite(d.at) && Number.isFinite(d.start) && Array.isArray(d.segs) && d.segs.every(v=>Number.isFinite(v) && v>0)) &&
     (!p.pipes || (Array.isArray(p.pipes) && p.pipes.length<=200 && p.pipes.every(pipe=>
@@ -3636,8 +3637,124 @@ async function switchPlan(id,importedState){
     return true;
   } finally { changingPlan=false; $('#planSelect').disabled=false; $('#savePlan').disabled=false; }
 }
+// iOS 扫描桥接：米制 ARKit X/Y/Z → 网页毫米制 X/Z 平面。
+function convertScanDocument(scan){
+  const fail=message=>{throw Error(message);};
+  const vec=v=>Array.isArray(v) && v.length===3 && v.every(n=>Number.isFinite(n) && Math.abs(n)<1000);
+  const axis=v=>vec(v) && Math.abs(Math.hypot(...v)-1)<.01 && Math.hypot(v[0],v[2])>.9;
+  const size=v=>Number.isFinite(v) && v>0 && v<100;
+  if(scan?.format!=='floorplan-scan' || scan.version!==1 || scan.units!=='m' ||
+    typeof scan.id!=='string' || !/^[a-z0-9-]{1,64}$/i.test(scan.id) ||
+    typeof scan.name!=='string' || !scan.name.trim() || scan.name.length>100 ||
+    !Number.isFinite(scan.floorY) || Math.abs(scan.floorY)>1000 ||
+    !Array.isArray(scan.surfaces) || scan.surfaces.length>2000 ||
+    !Array.isArray(scan.objects) || scan.objects.length>2000 ||
+    !Array.isArray(scan.floors) || !scan.floors.length || scan.floors.length>100) fail('扫描文件无效，或未扫描到地面轮廓。请使用 iOS 扫描应用补扫地面和墙角。');
+  const ids=new Set();
+  for(const s of scan.surfaces){
+    if(typeof s.id!=='string' || !/^[a-z0-9-]{1,64}$/i.test(s.id) || ids.has(s.id) ||
+      !['wall','window','door','opening'].includes(s.kind) || !vec(s.center) || !axis(s.xAxis) ||
+      !size(s.width) || !size(s.height) || !Number.isFinite(s.thickness) || s.thickness<0 || s.thickness>5) fail('扫描墙面或门窗数据无效。');
+    ids.add(s.id);
+  }
+  const surfaces=scan.surfaces.filter(s=>s.kind==='wall');
+  if(!surfaces.length) fail('扫描中没有墙体，请重新扫描。');
+  const project=v=>[v[0]*1000,v[2]*1000];
+  const direction=s=>{const n=Math.hypot(s.xAxis[0],s.xAxis[2]);return [s.xAxis[0]/n,s.xAxis[2]/n];};
+  const point=(w,t)=>[w.a[0]+w.c[0]*t,w.a[1]+w.c[1]*t];
+  const walls=surfaces.map(s=>{
+    const c=direction(s),center=project(s.center),length=s.width*1000;
+    return {id:s.id,c,a:[center[0]-c[0]*length/2,center[1]-c[1]*length/2],length,
+      thickness:s.thickness>0 ? s.thickness*1000 : 100,openings:[]};
+  });
+  const ceilingHeight=Math.max(...surfaces.map(s=>s.center[1]+s.height/2-scan.floorY));
+  if(ceilingHeight<1 || ceilingHeight>10) fail('层高超出编辑器支持范围，请检查扫描数据。');
+  const rooms=scan.floors.map((floor,i)=>{
+    if(!Array.isArray(floor.corners) || floor.corners.length<3 || floor.corners.length>500 ||
+      !floor.corners.every(p=>vec(p) && Math.abs(p[1]-scan.floorY)<.3)) fail('地面轮廓无效；第一版请逐个房间、同一楼层扫描。');
+    let poly=floor.corners.map(project);
+    if(Math.hypot(poly[0][0]-poly.at(-1)[0],poly[0][1]-poly.at(-1)[1])<1) poly.pop();
+    if(poly.length<3 || area(poly)<.1 || area(poly)>10000) fail('地面轮廓面积无效，请补扫房间。');
+    return {id:'scan-room-'+i,name:scan.floors.length===1 ? scan.name : scan.name+' '+(i+1),poly,mat:'wood'};
+  });
+  const inside=p=>rooms.some(r=>pointInPoly(p[0],p[1],r.poly));
+  const findInside=poly=>{
+    const [x0,y0,x1,y1]=bbox(poly),center=[(x0+x1)/2,(y0+y1)/2];
+    if(pointInPoly(...center,poly)) return center;
+    for(let y=1;y<20;y++) for(let x=1;x<20;x++){
+      const p=[x0+(x1-x0)*x/20,y0+(y1-y0)*y/20];if(pointInPoly(...p,poly)) return p;
+    }
+    fail('无法确定房间内部位置，请检查地面轮廓。');
+  };
+  rooms.forEach(r=>r.at=findInside(r.poly));
+  for(const s of scan.surfaces.filter(s=>s.kind!=='wall')){
+    const center=project(s.center),c=direction(s);
+    const candidates=walls.map(w=>{
+      const dx=center[0]-w.a[0],dy=center[1]-w.a[1],along=dx*w.c[0]+dy*w.c[1];
+      return {w,along,distance:Math.abs(dx*w.c[1]-dy*w.c[0]),alignment:Math.abs(c[0]*w.c[0]+c[1]*w.c[1])};
+    }).filter(x=>x.alignment>.9 && x.distance<250 && x.along>=-100 && x.along<=x.w.length+100)
+      .sort((a,b)=>(a.w.id===s.parentID ? -1 : b.w.id===s.parentID ? 1 : a.distance-b.distance));
+    if(!candidates.length) fail('有门窗无法匹配墙面，请重新扫描门窗周围的墙面。');
+    const {w,along}=candidates[0],lo=Math.max(0,along-s.width*500),hi=Math.min(w.length,along+s.width*500);
+    if(hi-lo<50 || w.openings.some(o=>lo<o.hi-5 && hi>o.lo+5)) fail('扫描门窗重叠或尺寸异常，请复核后重新扫描。');
+    w.openings.push({s,lo,hi});
+  }
+  const wallRects=[],windows=[],doors=[],lintels=[];
+  for(const w of walls){
+    const openings=w.openings.sort((a,b)=>a.lo-b.lo);let cursor=0;
+    const solid=(lo,hi)=>{if(hi-lo>1)wallRects.push(segmentWall(point(w,lo),point(w,hi),w.thickness,'u'));};
+    for(const o of openings){
+      solid(cursor,o.lo);cursor=o.hi;
+      const a=point(w,o.lo),b=point(w,o.hi),rect=segmentWall(a,b,w.thickness,'u');
+      const sill=Math.max(0,o.s.center[1]-o.s.height/2-scan.floorY);
+      const head=Math.min(ceilingHeight,o.s.center[1]+o.s.height/2-scan.floorY);
+      if(head<=sill) fail('门窗标高无效，请复核扫描。');
+      if(o.s.kind==='window') windows.push({id:'scan-'+o.s.id,a,b,t:w.thickness,sill,head});
+      else if(o.s.kind==='opening') lintels.push({rect,height:head});
+      else {
+        let normal=[-w.c[1],w.c[0]],mid=point(w,(o.lo+o.hi)/2);
+        if(!inside([mid[0]+normal[0]*150,mid[1]+normal[1]*150])) normal=normal.map(v=>-v);
+        doors.push({name:'扫描门（开启方向待确认）',rect,h:a,c:w.c,o:normal,len:o.hi-o.lo,height:head,entry:doors.length===0});
+      }
+    }
+    solid(cursor,w.length);
+  }
+  const catalog={bed:['bed','床'],sofa:['sofa','沙发'],chair:['chair','椅子'],table:['table','桌子'],
+    storage:['cabinet','柜子'],refrigerator:['fridge','冰箱'],stove:['stove','灶台'],sink:['vanity','洗手盆'],
+    toilet:['toilet','马桶'],bathtub:['bathtub','浴缸'],washerdryer:['washer','洗衣机'],dishwasher:['dishwasher','洗碗机'],
+    oven:['ovencol','烤箱柜'],television:['tv','电视'],fireplace:['cabinet','壁炉（占位）'],stairs:['cabinet','楼梯（占位）']};
+  const objectIDs=new Set();
+  const furniture=scan.objects.map(s=>{
+    if(typeof s.id!=='string' || !/^[a-z0-9-]{1,64}$/i.test(s.id) || objectIDs.has(s.id) ||
+      typeof s.category!=='string' || s.category.length>100 || !vec(s.center) || !axis(s.xAxis) ||
+      !vec(s.size) || !s.size.every(size)) fail('扫描家具尺寸或位置无效。');
+    objectIDs.add(s.id);
+    const key=s.category.toLowerCase().replace(/[^a-z]/g,''),item=catalog[key] || ['cabinet','扫描物体'];
+    const c=direction(s);
+    return {...F(item[0],item[1],s.center[0]*1000,s.center[2]*1000,s.size[0]*1000,s.size[2]*1000),
+      id:'scan-'+s.id,rot:(Math.atan2(c[1],c[0])*180/Math.PI+360)%360,
+      scanHeight:s.size[1]*1000,scanElevation:Math.max(0,(s.center[1]-scan.floorY-s.size[1]/2)*1000)};
+  });
+  const allPoints=rooms.flatMap(r=>r.poly).concat(walls.flatMap(w=>[w.a,point(w,w.length)]));
+  const [x0,y0,x1,y1]=bbox(allPoints),center=[(x0+x1)/2,(y0+y1)/2],span=Math.max(x1-x0,y1-y0)/1000;
+  const id='scan-'+scan.id.toLowerCase(),start=rooms[0].at;
+  const plan={id,name:scan.name,nameEn:scan.name,summary:scan.name,summaryEn:scan.name,ceilingHeight,center,
+    bounds:{x:x0-800,y:y0-800,w:x1-x0+1600,h:y1-y0+2000},walls:wallRects,windows,doors,slides:[],rooms,furniture,
+    dimensions:[{horizontal:true,at:y0-400,start:x0,segs:[x1-x0]},{horizontal:false,at:x1+400,start:y0,segs:[y1-y0]}],
+    dimNoteAt:[x0,y1+1000],entry:{arrow:[],label:'扫描户型 · 门向待确认',labelEn:'Scanned layout · Check door swings',
+      labelAt:[x0,y1+600],walkStart:start,walkLookAt:[start[0]+300,start[1]]},lintels,
+    iso:[span*.9,Math.max(ceilingHeight*2.5,span*1.8),span*1.4],topDistance:Math.max(5,span*2),
+    minimumOrbitDistance:Math.max(ceilingHeight*2.8,span*2.4),unverified:true,
+    notes:[{zh:'iPhone RoomPlan 扫描初稿。尺寸为扫描估计值；墙厚未识别时暂用 100 mm，门的铰链与开启方向为推定，家具为按扫描尺寸缩放的通用模型。请复核玻璃、墙厚、门向及关键定位尺寸。',
+      en:'RoomPlan scan draft. Dimensions are estimates; unmeasured wall thickness defaults to 100 mm and door hinges/swings are assumed. Furniture uses scaled generic models. Verify glass, thickness, swings and critical measurements.'}]};
+  if(!validPlan(plan)) fail('扫描结果无法转换成有效户型，请复核扫描数据。');
+  return {format:'floorplan-3d',version:2,plan,state:{planId:id,planRevision:1,furniture:copyData(furniture),
+    rooms:Object.fromEntries(rooms.map(r=>[r.id,{name:r.name,mat:r.mat}])),demolished:[],measures:[]}};
+}
+
 async function importPlanDocument(doc){
   if(switching || changingPlan) return false;
+  if(doc?.format==='floorplan-scan') doc=convertScanDocument(doc);
   if(doc?.format==='floorplan-3d' && doc.version===2){
     if(!validPlan(doc.plan) || !validFurniture(doc.state?.furniture)) throw Error('Invalid layout');
     let plan=copyData(doc.plan), existing=findPlan(plan.id);
@@ -4548,7 +4665,11 @@ function buildFurniture(f){
     default: g.add(box(w, .8, d, c));
   }
   if(f.type==='toilet' && Number.isFinite(f.height)) g.scale.y=M(f.height)/.79;
-  g.position.set(wx(f.cx), 0, wz(f.cy));
+  if(Number.isFinite(f.scanHeight) && f.scanHeight>0 && f.scanHeight<=30000){
+    const size=new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3());
+    if(size.y>.001) g.scale.y*=M(f.scanHeight)/size.y;
+  }
+  g.position.set(wx(f.cx), Number.isFinite(f.scanElevation) ? Math.max(0,M(f.scanElevation)) : 0, wz(f.cy));
   g.rotation.y = -f.rot * Math.PI/180;       // 平面顺时针旋转 → 绕 Y 轴负向
   g.userData.fid = f.id;
   return g;
@@ -4644,7 +4765,7 @@ function buildArch(){
     colliders.push(wallPoly(w).map(([x,y])=>[wx(x),wz(y)]));
   });
   // 门洞、飘窗洞口上方过梁
-  [...DOORS.map(d => [d.rect, 2.1]), ...SLIDES.map(s => [s.rect, s.v ? 2.4 : 2.1]), ...activePlan.lintels.map(l=>[l.rect,l.height])]
+  [...DOORS.map(d => [d.rect, d.height || 2.1]), ...SLIDES.map(s => [s.rect, s.v ? 2.4 : 2.1]), ...activePlan.lintels.map(l=>[l.rect,l.height])]
     .forEach(([r, h]) => { if (top > h) wallBox(r, h, top); });
   WINS.forEach(w => {
     const r=windowWall(w), sill=w.sill, head=w.head;
@@ -4675,7 +4796,7 @@ function buildArch(){
     }
   });
   DOORS.forEach(d => {
-    const pivot = new THREE.Group(), L = M(d.len), dh = Math.min(2.05, top);
+    const pivot = new THREE.Group(), L = M(d.len), dh = Math.min(d.height || 2.05, top);
     pivot.position.set(wx(d.h[0]), 0, wz(d.h[1]));
     const leaf = box(L, dh, .04, mat(d.entry ? '#6b4f3a' : '#efe6d8', {roughness:.5}), L/2);
     const knob = new THREE.Mesh(new THREE.SphereGeometry(.03, 12, 8), metal()); knob.position.set(L - .07, Math.min(1, dh - .05), 0); knob.scale.z = 2.2;
