@@ -71,7 +71,7 @@ swiftc -module-cache-path /tmp/RoomScannerModuleCache \
 node --test tests/*.test.cjs
 ```
 
-语法和数据测试不等于 iOS SDK 编译或真机扫描验证。当前开发机器缺少完整 Xcode，UIKit / RoomPlan 编译、签名安装与 iPhone 17 Pro 扫描效果需要在安装 Xcode 后验证。
+本地开发机器缺少完整 Xcode；独立 Swift 数据存储测试与网页测试可在本机运行。仓库的 [GitHub Actions](https://github.com/luoyh15/floorplan-3d/actions/workflows/ios-build.yml) 使用 macOS / Xcode 对模拟器和 iPhone 目标执行无签名编译检查。模拟器目标已通过 Xcode 26.6 构建；iPhone 目标检查也已加入流水线。签名安装和 iPhone 17 Pro 的真实扫描效果尚未验证，仍需连接手机实测。
 
 ## Apple 参考资料
 

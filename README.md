@@ -26,7 +26,7 @@
 
 配套 [iOS 户型扫描应用](ios/README.md) 使用 Apple RoomPlan 和 LiDAR 实时扫描单个房间，提供 3D 预览、本机历史、家具尺寸列表和 USDZ / JSON 导出。用 Xcode 打开 `ios/RoomScanner.xcodeproj`，配置个人签名后在带 LiDAR 的 iPhone 上运行。
 
-网页的“文件 → 导入户型 / 方案”支持该应用导出的 `floorplan-scan.json`：自动换算米到毫米，转换墙、门窗、地面多边形与家具位置、旋转、尺寸，创建独立的可编辑户型。可用 `ios/Fixtures/demo-scan.json` 测试。扫描值、推定墙厚及门向需复核。当前机器未安装完整 Xcode，iOS SDK 编译和真机扫描尚待验证。
+网页的“文件 → 导入户型 / 方案”支持该应用导出的 `floorplan-scan.json`：自动换算米到毫米，转换墙、门窗、地面多边形与家具位置、旋转、尺寸，创建独立的可编辑户型。可用 `ios/Fixtures/demo-scan.json` 测试。扫描值、推定墙厚及门向需复核。iOS 模拟器目标已通过 GitHub macOS / Xcode 编译，流水线还包含 iPhone 目标无签名编译；签名安装与真机扫描尚待验证。
 
 ## 卫生间独立户型
 

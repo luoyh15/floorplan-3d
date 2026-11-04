@@ -34,6 +34,8 @@ jobs:
           "$RUNNER_TEMP/RoomScannerCoreTests" ios/Fixtures/demo-scan.json
       - name: Build for iOS Simulator without signing
         run: xcodebuild -project ios/RoomScanner.xcodeproj -scheme RoomScanner -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath "$RUNNER_TEMP/RoomScannerDerived" CODE_SIGNING_ALLOWED=NO build
+      - name: Build for iPhone without signing
+        run: xcodebuild -project ios/RoomScanner.xcodeproj -scheme RoomScanner -configuration Debug -destination 'generic/platform=iOS' -derivedDataPath "$RUNNER_TEMP/RoomScannerDeviceDerived" CODE_SIGNING_ALLOWED=NO build
   web:
     runs-on: ubuntu-latest
     timeout-minutes: 5

@@ -5,7 +5,7 @@ import UIKit
 
 @MainActor
 final class ScannerController: NSObject, ObservableObject, @preconcurrency RoomCaptureViewDelegate,
-                               @preconcurrency RoomCaptureSessionDelegate {
+                               RoomCaptureSessionDelegate {
     enum Phase: Equatable { case idle, scanning, processing, review, saving }
     @Published var phase: Phase = .idle
     @Published var showCapture = false

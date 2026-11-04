@@ -26,7 +26,7 @@ Validation: `node --test tests/*.test.cjs`.
 
 The companion [iOS scanner](ios/README.md) uses Apple RoomPlan and LiDAR for live single-room capture, interactive 3D review, local scan history, measured object dimensions, and USDZ / JSON exports. Open `ios/RoomScanner.xcodeproj` in Xcode and configure signing for a LiDAR-equipped iPhone.
 
-The web editor's layout import accepts the app's `floorplan-scan.json`, converts meters to millimeters, preserves floor polygons, cuts door/window openings, and creates a separate editable layout with scaled generic furniture. Try `ios/Fixtures/demo-scan.json`. Measurements, assumed wall thickness and door swings need verification. The development machine lacks full Xcode; iOS SDK compilation and physical-device scanning remain unverified.
+The web editor's layout import accepts the app's `floorplan-scan.json`, converts meters to millimeters, preserves floor polygons, cuts door/window openings, and creates a separate editable layout with scaled generic furniture. Try `ios/Fixtures/demo-scan.json`. Measurements, assumed wall thickness and door swings need verification. The simulator target has passed a GitHub macOS / Xcode build; CI also includes an unsigned iPhone target build. Signing, installation and physical-device scanning remain unverified.
 
 ## Standalone bathroom
 
