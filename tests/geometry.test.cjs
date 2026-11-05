@@ -21,7 +21,7 @@ run(`const wx=x=>x/1000,wz=y=>y/1000,clamp01=x=>Math.max(0,Math.min(1,x));
 test('photo dimensions, room topology and openings stay finite and non-degenerate',()=>{
   assert.equal(run('CEILING_HEIGHT'),3.3);
   assert.equal(run('ROOMS.filter(r=>["master","north-bed","south-bed","curve-bed"].includes(r.id)).length'),4);
-  assert.equal(run('ROOMS.filter(r=>r.name.includes("卫浴")).length'),3);
+  assert.equal(run('ROOMS.filter(r=>r.name.includes("卫浴")).length'),4);
   assert.equal(run('ROOMS.every(r=>r.poly.length>=3 && r.poly.every(p=>p.every(Number.isFinite)) && area(r.poly)>0)'),true);
   assert.equal(run('WALLS.every(w=>w[2]>w[0] && w[3]>w[1])'),true);
   assert.equal(run('WINS.every(w=>Math.hypot(w.b[0]-w.a[0],w.b[1]-w.a[1])>0 && w.t>0 && w.head>w.sill)'),true);
@@ -38,8 +38,8 @@ test('diagonal wall collision follows the wall instead of blocking its entire bo
 
 test('curved glazing blocks walking at the curve and leaves the bedroom interior accessible',()=>{
   run('colliders=WINS.filter(w=>BEDROOM_ARC.some(p=>p[0]===w.a[0] && p[1]===w.a[1])).map(w=>wallPoly(windowWall(w)).map(([x,y])=>[wx(x),wz(y)]));');
-  assert.equal(run('blocked(11.545,13.95)'),true);
-  assert.equal(run('blocked(11.545,13.3)'),false);
+  assert.equal(run('blocked(BEDROOM_ARC[5][0]/1000,BEDROOM_ARC[5][1]/1000)'),true);
+  assert.equal(run('blocked(BEDROOM_ARC[5][0]/1000,BEDROOM_ARC[5][1]/1000-.65)'),false);
 });
 
 test('double entrance leaves use their own length for collisions',()=>{
@@ -49,7 +49,7 @@ test('double entrance leaves use their own length for collisions',()=>{
 });
 
 test('new storage is isolated and exported state survives a JSON round trip',()=>{
-  assert.equal(run('STORE'),'huxing-design-img-0914-v1');
+  assert.equal(run('STORE'),'huxing-design-img-0914-v2');
   assert.equal(run('STORE === "huxing-design-v1"'),false);
   assert.equal(run('(()=>{const d=defaultState(),r=fixState(JSON.parse(JSON.stringify(d))); return r.planId===PLAN_ID && r.furniture.length===d.furniture.length && Object.keys(r.rooms).length===ROOMS.length;})()'),true);
   assert.equal(run('fixState({furniture:[],rooms:{old:{name:"Old room"}},demolished:["w0"]}).demolished.length'),0);
@@ -65,7 +65,7 @@ test('bedroom side glazing has two outward casements and no exterior door',()=>{
     return !pointInPoly(h[0]+o[0]*len,h[1]+o[1]*len,master.poly);
   })`),true);
   run('doors=[];colliders=WINS.filter(w=>w.casement).map(w=>wallPoly(windowWall(w)).map(([x,y])=>[wx(x),wz(y)]));');
-  assert.equal(run('blocked(-.41,8.545)'),true); // former exterior door is now a window sill
+  assert.equal(run('blocked(-.38,7.65)'),true); // former exterior door is now a window sill
 });
 
 test('staff room labels migrate without discarding customized names or furniture',()=>{

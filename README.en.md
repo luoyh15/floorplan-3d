@@ -4,9 +4,9 @@
 
 A pure front-end tool for interior design on a floor plan: place furniture, remove or modify walls, and take measurements on a 2D plan, then switch to a Three.js 3D scene with one click — view it from above or walk through it in first person. The whole app is a single `index.html`: no build step, just open it.
 
-## Current layout: IMG_0914
+## Current layout: replacement plan supplied on 2026-11-05
 
-The default layout is reconstructed from the supplied IMG_0914 photo: four bedrooms, two living areas, three bathrooms, a confirmed 3.3 m ceiling, a diagonal double entrance door, a curved bedroom window and two balconies. The northern suite is a staff room with its own bathroom; the main bedroom has two outward-opening side casements. Labeled dimensions take priority; unspecified wall thickness, openings and curved glazing are estimated. Areas are for layout reference.
+The latest image replaces “My home” with four bedrooms, two living areas and four bathrooms, including a kitchen-side bathroom, separate laundry balcony and entrance vestibule. A continuous curved south facade spans the bedroom and scenic balcony; the former small master balcony is removed. The previously confirmed 3.3 m ceiling, staff suite and two outward side casements are retained. Blurred dimensions are not treated as exact: the plan is traced at approximately 20 mm/pixel. Walls, openings and furniture need on-site verification. The previous home model is removed and its retired v1 arrangement is cleared on opening the new version; other layouts remain independent.
 
 Interior walls use `u` (structural properties unverified) and can be highlighted with “Unverified walls”; their removal is disabled. Exterior walls use `e`.
 
@@ -16,7 +16,7 @@ Use the top Layout selector to switch between the corrected four-bedroom layout,
 
 `floorplans/img-0914.json` backs up the corrected layout (3.3 m ceiling, staff suite, two outward-opening side casements); `floorplans/original.json` backs up the original. Both files can be imported. The built-in catalog is also embedded in `index.html` as `BUILTIN_PLANS` so opening the HTML directly still works.
 
-Browser keys: `huxing-design-img-0914-v1` for the corrected layout, the existing `huxing-design-v1` for the original, and `huxing-custom-plans-v1` for the custom catalog. Exports use `{format:"floorplan-3d", version:2, plan, state}`, with `state.planId` identifying the arrangement’s layout.
+Browser keys: `huxing-design-img-0914-v2` for the corrected layout, the existing `huxing-design-v1` for the original, and `huxing-custom-plans-v1` for the custom catalog. Exports use `{format:"floorplan-3d", version:2, plan, state}`, with `state.planId` identifying the arrangement’s layout.
 
 Coordinates are in mm, with the origin at the intersection of the western main-bedroom wall centerline and the northernmost wall centerline. The optional sixth `WALLS` element is a diagonal wall polygon. `WINS` uses `{a, b, t, sill, head}` for centerline endpoints, thickness (mm), and sill/head heights (m). Continuous segments form curved glazing.
 

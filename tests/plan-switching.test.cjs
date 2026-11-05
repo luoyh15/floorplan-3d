@@ -42,7 +42,7 @@ test('each layout restores its own furniture, rooms and measurements',async()=>{
   await run(`switchPlan('original')`);
   assert.equal(run('state.furniture[0].cx'),8123);
   assert.ok(storage.has('huxing-design-v1'));
-  assert.ok(storage.has('huxing-design-img-0914-v1'));
+  assert.ok(storage.has('huxing-design-img-0914-v2'));
 });
 
 test('reopening the app restores the last selection and old original-layout storage',async()=>{
@@ -148,8 +148,8 @@ test('different viewport and dimension metadata also create a separate imported 
   const {run}=app();run('const doc=exportPlanDocument();doc.plan.bounds.w+=1000;doc.plan.dimensions[0].at-=100;');
   await run('importPlanDocument(doc)');
   assert.notEqual(run('PLAN_ID'),'img-0914');
-  assert.equal(run('BOUNDS.w'),23400);
-  assert.equal(run(`findPlan('img-0914').bounds.w`),22400);
+  assert.equal(run('BOUNDS.w'),24700);
+  assert.equal(run(`findPlan('img-0914').bounds.w`),23700);
 });
 
 test('a second selection during an animated switch cannot replace the pending layout',async()=>{
