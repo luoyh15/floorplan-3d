@@ -67,7 +67,7 @@ test('full JSON import adds another layout without overwriting built-ins',async(
   assert.equal(JSON.parse(storage.get('huxing-custom-plans-v1')).length,1);
   const reopened=app(Object.fromEntries(storage));
   assert.equal(reopened.run('CEILING_HEIGHT'),3.6);
-  assert.equal(reopened.run('allPlans().length'),4);
+  assert.equal(reopened.run('allPlans().length'),5);
 });
 
 test('matching JSON imports restore state and legacy JSON selects the correct layout',async()=>{

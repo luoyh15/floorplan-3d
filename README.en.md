@@ -4,6 +4,8 @@
 
 A pure front-end tool for interior design on a floor plan: place furniture, remove or modify walls, and take measurements on a 2D plan, then switch to a Three.js 3D scene with one click — view it from above or walk through it in first person. The whole app is a single `index.html`: no build step, just open it.
 
+The Layout selector also includes “My home · demolition preview” (`floorplans/demolition-preview.json`). Its bundled starting arrangement preserves the uploaded file’s 71 furniture items, eight removed-wall flags, room materials and measurements. Later edits save independently; Reset restores this complete saved arrangement. Existing layouts remain available.
+
 ## Current layout: replacement plan supplied on 2026-11-05
 
 The latest image replaces “My home” with four bedrooms, two living areas and four bathrooms, including a kitchen-side bathroom, separate laundry balcony and entrance vestibule. A continuous curved south facade spans the bedroom and scenic balcony; the former small master balcony is removed. The previously confirmed 3.3 m ceiling, staff suite and two outward side casements are retained. Blurred dimensions are not treated as exact: the plan is traced at approximately 20 mm/pixel. Walls, openings and furniture need on-site verification. The previous home model is removed and its retired v1 arrangement is cleared on opening the new version; other layouts remain independent.
